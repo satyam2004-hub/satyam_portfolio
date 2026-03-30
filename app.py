@@ -9,10 +9,10 @@ portfolio_data = {
     "email": "satyam1sapkota@gmail.com",
     "phone": "9742870682",
     "social": {
-        "instagram": "https://instagram.com/yourusername",
-        "facebook": "https://facebook.com/yourusername",
-        "linkedin": "https://linkedin.com/in/yourusername",
-        "github": "https://github.com/yourusername",
+        "instagram": "https://instagram.com/satyam_sapkota",
+        "facebook": "https://www.facebook.com/SatyamSapkota",
+        "linkedin": "https://www.linkedin.com/in/satyam-sapkota-259022358/",
+        "github": "https://github.com/satyam2004-hub",
     },
     "about": (
         "Motivated and results-driven IT graduate with hands-on experience in "
