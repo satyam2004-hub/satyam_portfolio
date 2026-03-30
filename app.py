@@ -9,8 +9,8 @@ portfolio_data = {
     "email": "satyam1sapkota@gmail.com",
     "phone": "9742870682",
     "social": {
-        "instagram": "https://instagram.com/satyam_sapkota",
-        "facebook": "https://www.facebook.com/SatyamSapkota",
+        "instagram": "https://www.instagram.com/satyam__sapkota/?hl=en",
+        "facebook": "https://www.facebook.com/satyam.sapkota.92",
         "linkedin": "https://www.linkedin.com/in/satyam-sapkota-259022358/",
         "github": "https://github.com/satyam2004-hub",
     },
