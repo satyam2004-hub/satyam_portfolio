@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ data.name }} — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+{% from "icons.html" import instagram, facebook, linkedin, github %}
+
+<nav>
+  <a href="#hero" class="nav-logo">
+    <div class="nav-logo-icon">SS</div>
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Satyam Sapkota</span>
+      <span class="nav-logo-role">Dev &amp; Creator</span>
+    </div>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+
+  <div class="nav-social">
+    <a href="{{ data.social.instagram }}" target="_blank" title="Instagram">{{ instagram() }}</a>
+    <a href="{{ data.social.facebook }}" target="_blank" title="Facebook">{{ facebook() }}</a>
+    <a href="{{ data.social.linkedin }}" target="_blank" title="LinkedIn">{{ linkedin() }}</a>
+    <a href="{{ data.social.github }}" target="_blank" title="GitHub">{{ github() }}</a>
+  </div>
+</nav>
+
+
+<section id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Available for opportunities
+    </div>
+    <h1>{{ data.name.split()[0] }}<br><span>{{ data.name.split()[1] }}</span></h1>
+    <p class="hero-tagline">
+      {{ data.tagline }} &nbsp;·&nbsp; {{ data.location }}
+    </p>
+    <div class="hero-social">
+      <a href="{{ data.social.instagram }}" target="_blank" title="Instagram">{{ instagram() }}</a>
+      <a href="{{ data.social.facebook }}" target="_blank" title="Facebook">{{ facebook() }}</a>
+      <a href="{{ data.social.linkedin }}" target="_blank" title="LinkedIn">{{ linkedin() }}</a>
+      <a href="{{ data.social.github }}" target="_blank" title="GitHub">{{ github() }}</a>
+    </div>
+    <div class="hero-cta">
+      <a href="#projects" class="btn btn-primary">View Projects →</a>
+      <a href="mailto:{{ data.email }}" class="btn btn-outline">✉ Get In Touch</a>
+    </div>
+  </div>
+</section>
+
+
+<section id="about">
+  <div class="section-header">
+    <div class="section-label">About Me</div>
+    <h2>Crafting Digital Experiences</h2>
+  </div>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>{{ data.about }}</p>
+      <p>Currently pursuing my BIT degree while building real-world products — from Unity games to Django web apps and Arduino IoT systems.</p>
+    </div>
+    <div class="about-info">
+      <div class="info-item">
+        <div class="info-label">Location</div>
+        <div class="info-value">{{ data.location }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Status</div>
+        <div class="info-value">Open to Work ✅</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Current CGPA</div>
+        <div class="info-value">{{ data.education.cgpa_current }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Languages</div>
+        <div class="info-value">{% for lang in data.languages %}{{ lang.lang }}{% if not loop.last %} · {% endif %}{% endfor %}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="education">
+  <div class="section-header">
+    <div class="section-label">Education</div>
+    <h2>Academic Background</h2>
+  </div>
+  <div class="edu-card">
+    <span class="edu-duration">{{ data.education.duration }}</span>
+    <div class="edu-degree">{{ data.education.degree }}</div>
+    <div class="edu-inst">{{ data.education.institution }}</div>
+    <div class="edu-affil">{{ data.education.affiliation }} — {{ data.education.location }}</div>
+    <div class="edu-stats">
+      <div class="edu-stat">
+        <div class="edu-stat-val">{{ data.education.cgpa_current.split('/')[0].strip() }}</div>
+        <div class="edu-stat-label">Current GPA</div>
+      </div>
+      <div class="edu-stat">
+        <div class="edu-stat-val">{{ data.education.cgpa_expected.split('/')[0].strip() }}</div>
+        <div class="edu-stat-label">Expected GPA</div>
+      </div>
+      <div class="edu-stat">
+        <div class="edu-stat-val">4.0</div>
+        <div class="edu-stat-label">Scale</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="experience">
+  <div class="section-header">
+    <div class="section-label">Work Experience</div>
+    <h2>Where I've Worked</h2>
+  </div>
+  <div class="exp-timeline">
+    {% for exp in data.experience %}
+    <div class="exp-card">
+      <div class="exp-header">
+        <div class="exp-icon">{{ exp.icon }}</div>
+        <div class="exp-meta">
+          <div class="exp-role">{{ exp.role }}</div>
+          <div class="exp-company">{{ exp.company }} — {{ exp.location }}</div>
+        </div>
+        <div class="exp-year">{{ exp.year }}</div>
+      </div>
+      <ul class="exp-points">
+        {% for point in exp.points %}
+        <li>{{ point }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+
+<section id="projects">
+  <div class="section-header">
+    <div class="section-label">Projects</div>
+    <h2>Things I've Built</h2>
+  </div>
+  <div class="projects-grid">
+    {% for proj in data.projects %}
+    <div class="proj-card">
+      <div class="proj-emoji">{{ proj.emoji }}</div>
+      <div class="proj-name">{{ proj.name }}</div>
+      <div class="proj-tech">{{ proj.tech }}</div>
+      <div class="proj-desc">{{ proj.desc }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+
+<section id="skills">
+  <div class="section-header">
+    <div class="section-label">Skills</div>
+    <h2>My Technical Arsenal</h2>
+  </div>
+  <div class="skills-grid">
+    {% for group, items in data.skills.items() %}
+    <div class="skill-group">
+      <div class="skill-group-title">{{ group }}</div>
+      <div class="skill-tags">
+        {% for skill in items %}
+        <span class="skill-tag">{{ skill }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="soft-skills-grid">
+    {% for s in data.soft_skills %}
+    <div class="soft-skill">{{ s }}</div>
+    {% endfor %}
+  </div>
+</section>
+
+
+<section id="contact">
+  <div class="contact-inner">
+    <div class="section-label" style="justify-content:center; display:flex;">Contact</div>
+    <h2>Let's Build Something</h2>
+    <p>I'm always open to new opportunities, collaborations, or just a good chat about tech. Reach out anytime!</p>
+    <div class="contact-links">
+      <a href="mailto:{{ data.email }}" class="contact-link">
+        ✉ {{ data.email }}
+      </a>
+      <a href="tel:{{ data.phone }}" class="contact-link">
+        📞 {{ data.phone }}
+      </a>
+    </div>
+    <div class="contact-social">
+      <a href="{{ data.social.instagram }}" target="_blank" title="Instagram">{{ instagram() }}</a>
+      <a href="{{ data.social.facebook }}" target="_blank" title="Facebook">{{ facebook() }}</a>
+      <a href="{{ data.social.linkedin }}" target="_blank" title="LinkedIn">{{ linkedin() }}</a>
+      <a href="{{ data.social.github }}" target="_blank" title="GitHub">{{ github() }}</a>
+    </div>
+    <a href="mailto:{{ data.email }}" class="btn btn-primary" style="font-size:1rem; padding:1rem 2.5rem;">
+      Say Hello →
+    </a>
+  </div>
+</section>
+
+
+<footer>
+  <div class="footer-text">© 2026 <span class="footer-accent">{{ data.name }}</span>. All rights reserved.</div>
+  <div class="footer-text">Built with <span class="footer-accent">Python</span> &amp; Flask</div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>
