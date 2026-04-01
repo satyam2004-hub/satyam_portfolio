@@ -1,8 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="{{ data.name }} - {{ data.tagline }}. Portfolio showcasing projects in game development, web development, and IoT systems."/>
+  <meta name="keywords" content="Satyam Sapkota, Portfolio, Game Developer, Full Stack Developer, Python, Django, Unity, PHP, IoT"/>
+  <meta name="author" content="{{ data.name }}"/>
+  <meta name="theme-color" content="#0b0e13"/>
+
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="{{ data.name }} — Portfolio"/>
+  <meta property="og:description" content="{{ data.tagline }} | {{ data.location }}"/>
+  <meta property="og:site_name" content="{{ data.name }} Portfolio"/>
+
   <title>{{ data.name }} — Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -11,14 +22,20 @@
 </head>
 <body>
 
-{% from "icons.html" import instagram, facebook, linkedin, github %}
+<!-- Loading Screen -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading...</div>
+</div>
+
+{% from "icons.html" import instagram, facebook, linkedin, github, external_link, download, arrow_up %}
 
 <nav>
   <a href="#hero" class="nav-logo">
     <div class="nav-logo-icon">SS</div>
     <div class="nav-logo-text">
       <span class="nav-logo-name">Satyam Sapkota</span>
-      <span class="nav-logo-role">Dev &amp; Creator</span>
+      <span class="nav-logo-role">Dev & Creator</span>
     </div>
   </a>
 
@@ -31,12 +48,35 @@
   </ul>
 
   <div class="nav-social">
-    <a href="{{ data.social.instagram }}" target="_blank" title="Instagram">{{ instagram() }}</a>
-    <a href="{{ data.social.facebook }}" target="_blank" title="Facebook">{{ facebook() }}</a>
-    <a href="{{ data.social.linkedin }}" target="_blank" title="LinkedIn">{{ linkedin() }}</a>
-    <a href="{{ data.social.github }}" target="_blank" title="GitHub">{{ github() }}</a>
+    <a href="{{ data.social.instagram }}" target="_blank" rel="noopener noreferrer" title="Instagram">{{ instagram() }}</a>
+    <a href="{{ data.social.facebook }}" target="_blank" rel="noopener noreferrer" title="Facebook">{{ facebook() }}</a>
+    <a href="{{ data.social.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn">{{ linkedin() }}</a>
+    <a href="{{ data.social.github }}" target="_blank" rel="noopener noreferrer" title="GitHub">{{ github() }}</a>
   </div>
+
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
 </nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <ul class="mobile-nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="mobile-social">
+    <a href="{{ data.social.instagram }}" target="_blank" rel="noopener noreferrer" title="Instagram">{{ instagram() }}</a>
+    <a href="{{ data.social.facebook }}" target="_blank" rel="noopener noreferrer" title="Facebook">{{ facebook() }}</a>
+    <a href="{{ data.social.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn">{{ linkedin() }}</a>
+    <a href="{{ data.social.github }}" target="_blank" rel="noopener noreferrer" title="GitHub">{{ github() }}</a>
+  </div>
+</div>
 
 
 <section id="hero">
@@ -53,14 +93,19 @@
       {{ data.tagline }} &nbsp;·&nbsp; {{ data.location }}
     </p>
     <div class="hero-social">
-      <a href="{{ data.social.instagram }}" target="_blank" title="Instagram">{{ instagram() }}</a>
-      <a href="{{ data.social.facebook }}" target="_blank" title="Facebook">{{ facebook() }}</a>
-      <a href="{{ data.social.linkedin }}" target="_blank" title="LinkedIn">{{ linkedin() }}</a>
-      <a href="{{ data.social.github }}" target="_blank" title="GitHub">{{ github() }}</a>
+      <a href="{{ data.social.instagram }}" target="_blank" rel="noopener noreferrer" title="Instagram">{{ instagram() }}</a>
+      <a href="{{ data.social.facebook }}" target="_blank" rel="noopener noreferrer" title="Facebook">{{ facebook() }}</a>
+      <a href="{{ data.social.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn">{{ linkedin() }}</a>
+      <a href="{{ data.social.github }}" target="_blank" rel="noopener noreferrer" title="GitHub">{{ github() }}</a>
     </div>
     <div class="hero-cta">
       <a href="#projects" class="btn btn-primary">View Projects →</a>
       <a href="mailto:{{ data.email }}" class="btn btn-outline">✉ Get In Touch</a>
+      {% if data.resume_url and data.resume_url != '#' %}
+      <a href="{{ data.resume_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+        {{ download() }} Download Resume
+      </a>
+      {% endif %}
     </div>
   </div>
 </section>
@@ -165,6 +210,18 @@
       <div class="proj-name">{{ proj.name }}</div>
       <div class="proj-tech">{{ proj.tech }}</div>
       <div class="proj-desc">{{ proj.desc }}</div>
+      <div class="proj-links">
+        {% if proj.demo_url and proj.demo_url != '#' %}
+        <a href="{{ proj.demo_url }}" target="_blank" rel="noopener noreferrer" class="proj-link">
+          {{ external_link() }} Live Demo
+        </a>
+        {% endif %}
+        {% if proj.repo_url and proj.repo_url != '#' %}
+        <a href="{{ proj.repo_url }}" target="_blank" rel="noopener noreferrer" class="proj-link">
+          {{ github() }} Source Code
+        </a>
+        {% endif %}
+      </div>
     </div>
     {% endfor %}
   </div>
@@ -210,10 +267,10 @@
       </a>
     </div>
     <div class="contact-social">
-      <a href="{{ data.social.instagram }}" target="_blank" title="Instagram">{{ instagram() }}</a>
-      <a href="{{ data.social.facebook }}" target="_blank" title="Facebook">{{ facebook() }}</a>
-      <a href="{{ data.social.linkedin }}" target="_blank" title="LinkedIn">{{ linkedin() }}</a>
-      <a href="{{ data.social.github }}" target="_blank" title="GitHub">{{ github() }}</a>
+      <a href="{{ data.social.instagram }}" target="_blank" rel="noopener noreferrer" title="Instagram">{{ instagram() }}</a>
+      <a href="{{ data.social.facebook }}" target="_blank" rel="noopener noreferrer" title="Facebook">{{ facebook() }}</a>
+      <a href="{{ data.social.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn">{{ linkedin() }}</a>
+      <a href="{{ data.social.github }}" target="_blank" rel="noopener noreferrer" title="GitHub">{{ github() }}</a>
     </div>
     <a href="mailto:{{ data.email }}" class="btn btn-primary" style="font-size:1rem; padding:1rem 2.5rem;">
       Say Hello →
@@ -224,8 +281,13 @@
 
 <footer>
   <div class="footer-text">© 2026 <span class="footer-accent">{{ data.name }}</span>. All rights reserved.</div>
-  <div class="footer-text">Built with <span class="footer-accent">Python</span> &amp; Flask</div>
+  <div class="footer-text">Built with <span class="footer-accent">Python</span> & Flask</div>
 </footer>
+
+<!-- Scroll to Top Button -->
+<button class="scroll-top" id="scrollTop" aria-label="Scroll to top">
+  {{ arrow_up() }}
+</button>
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 

@@ -8,6 +8,7 @@ portfolio_data = {
     "location": "Bhaktapur, Kathmandu, Nepal",
     "email": "satyam1sapkota@gmail.com",
     "phone": "9742870682",
+    "resume_url": "https://drive.google.com/file/d/YOUR_RESUME_ID/view",  # Update with your actual Google Drive resume link
     "social": {
         "instagram": "https://www.instagram.com/satyam__sapkota/?hl=en",
         "facebook": "https://www.facebook.com/satyam.sapkota.92",
@@ -63,24 +64,32 @@ portfolio_data = {
             "tech": "Django / Python",
             "emoji": "📚",
             "desc": "Full-stack web application enabling users to browse, order, and track book deliveries online. Built with Django framework, SQLite database, and responsive HTML/CSS front-end.",
+            "demo_url": "#",  # Add your live demo URL
+            "repo_url": "#",  # Add your GitHub repo URL
         },
         {
             "name": "Smart Parking System",
             "tech": "Arduino / IoT",
             "emoji": "🅿️",
             "desc": "IoT-based automated smart parking system using ultrasonic sensors and Arduino microcontroller. Real-time parking slot detection and LED indicator system.",
+            "demo_url": "#",  # Add demo video or images URL
+            "repo_url": "#",  # Add your GitHub repo URL
         },
         {
             "name": "Texas News Portal",
             "tech": "PHP / MySQL",
             "emoji": "📰",
             "desc": "College news portal with an admin panel for content management, user authentication, dynamic news categories, and a responsive UI layout.",
+            "demo_url": "#",  # Add your live demo URL
+            "repo_url": "#",  # Add your GitHub repo URL
         },
         {
             "name": "Portfolio Website",
             "tech": "WordPress",
             "emoji": "🌐",
             "desc": "Designed and deployed a personal portfolio website using WordPress with custom theme customization.",
+            "demo_url": "#",  # Add your live demo URL
+            "repo_url": "#",  # N/A for WordPress
         },
     ],
     "skills": {
