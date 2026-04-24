@@ -19,6 +19,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
@@ -83,6 +84,7 @@
   <div class="hero-grid-bg"></div>
   <div class="hero-glow"></div>
   <div class="hero-glow2"></div>
+  <div id="human-3d-container"></div>
   <div class="hero-content">
     <div class="hero-badge">
       <span class="hero-badge-dot"></span>
@@ -290,6 +292,189 @@
 </button>
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+<!-- 3D Human Model Script -->
+<script>
+(function(){
+  const container = document.getElementById('human-3d-container');
+  if(!container) return;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight, 0.1, 100);
+  camera.position.set(0, 1, 5);
+  camera.lookAt(0, 0, 0);
+
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+  container.appendChild(renderer.domElement);
+
+  // Create human figure from geometric shapes
+  const humanGroup = new THREE.Group();
+
+  // Materials
+  const skinMat = new THREE.MeshPhongMaterial({color: 0xffdbac, shininess: 30});
+  const shirtMat = new THREE.MeshPhongMaterial({color: 0x00e5c0, shininess: 50});
+  const pantsMat = new THREE.MeshPhongMaterial({color: 0x1a1a2e, shininess: 20});
+  const hairMat = new THREE.MeshPhongMaterial({color: 0x2d1810, shininess: 15});
+  const shoeMat = new THREE.MeshPhongMaterial({color: 0x333333, shininess: 25});
+
+  // Head
+  const headGeo = new THREE.SphereGeometry(0.35, 32, 32);
+  const head = new THREE.Mesh(headGeo, skinMat);
+  head.position.y = 1.6;
+  humanGroup.add(head);
+
+  // Hair
+  const hairGeo = new THREE.SphereGeometry(0.37, 32, 32, 0, Math.PI * 2, 0, Math.PI * 0.4);
+  const hair = new THREE.Mesh(hairGeo, hairMat);
+  hair.position.y = 1.65;
+  hair.rotation.x = -0.1;
+  humanGroup.add(hair);
+
+  // Eyes
+  const eyeGeo = new THREE.SphereGeometry(0.04, 16, 16);
+  const eyeMat = new THREE.MeshPhongMaterial({color: 0x1a1a1a, shininess: 80});
+  const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+  leftEye.position.set(-0.12, 1.62, 0.3);
+  humanGroup.add(leftEye);
+  const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+  rightEye.position.set(0.12, 1.62, 0.3);
+  humanGroup.add(rightEye);
+
+  // Torso
+  const torsoGeo = new THREE.CylinderGeometry(0.3, 0.25, 0.7, 16);
+  const torso = new THREE.Mesh(torsoGeo, shirtMat);
+  torso.position.y = 1.0;
+  humanGroup.add(torso);
+
+  // Shoulders
+  const shoulderGeo = new THREE.CylinderGeometry(0.32, 0.3, 0.15, 16);
+  const shoulders = new THREE.Mesh(shoulderGeo, shirtMat);
+  shoulders.position.y = 1.3;
+  shoulders.rotation.z = Math.PI / 2;
+  humanGroup.add(shoulders);
+
+  // Left Arm
+  const armGeo = new THREE.CylinderGeometry(0.08, 0.07, 0.5, 12);
+  const leftArm = new THREE.Mesh(armGeo, shirtMat);
+  leftArm.position.set(-0.45, 1.1, 0);
+  leftArm.rotation.z = 0.3;
+  humanGroup.add(leftArm);
+
+  // Right Arm
+  const rightArm = new THREE.Mesh(armGeo, shirtMat);
+  rightArm.position.set(0.45, 1.1, 0);
+  rightArm.rotation.z = -0.3;
+  humanGroup.add(rightArm);
+
+  // Hands
+  const handGeo = new THREE.SphereGeometry(0.08, 12, 12);
+  const leftHand = new THREE.Mesh(handGeo, skinMat);
+  leftHand.position.set(-0.5, 0.83, 0);
+  humanGroup.add(leftHand);
+  const rightHand = new THREE.Mesh(handGeo, skinMat);
+  rightHand.position.set(0.5, 0.83, 0);
+  humanGroup.add(rightHand);
+
+  // Pants/Hips
+  const hipsGeo = new THREE.CylinderGeometry(0.25, 0.22, 0.2, 16);
+  const hips = new THREE.Mesh(hipsGeo, pantsMat);
+  hips.position.y = 0.65;
+  humanGroup.add(hips);
+
+  // Left Leg
+  const legGeo = new THREE.CylinderGeometry(0.1, 0.08, 0.7, 12);
+  const leftLeg = new THREE.Mesh(legGeo, pantsMat);
+  leftLeg.position.set(-0.12, 0.2, 0);
+  humanGroup.add(leftLeg);
+
+  // Right Leg
+  const rightLeg = new THREE.Mesh(legGeo, pantsMat);
+  rightLeg.position.set(0.12, 0.2, 0);
+  humanGroup.add(rightLeg);
+
+  // Shoes
+  const shoeGeo = new THREE.BoxGeometry(0.15, 0.08, 0.25);
+  const leftShoe = new THREE.Mesh(shoeGeo, shoeMat);
+  leftShoe.position.set(-0.12, -0.2, 0.03);
+  humanGroup.add(leftShoe);
+  const rightShoe = new THREE.Mesh(shoeGeo, shoeMat);
+  rightShoe.position.set(0.12, -0.2, 0.03);
+  humanGroup.add(rightShoe);
+
+  scene.add(humanGroup);
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+  scene.add(ambientLight);
+
+  const dirLight = new THREE.DirectionalLight(0x00e5c0, 0.8);
+  dirLight.position.set(2, 3, 4);
+  scene.add(dirLight);
+
+  const dirLight2 = new THREE.DirectionalLight(0x7c6bff, 0.4);
+  dirLight2.position.set(-2, 1, -2);
+  scene.add(dirLight2);
+
+  // Floating platform
+  const platformGeo = new THREE.CylinderGeometry(0.8, 0.9, 0.05, 32);
+  const platformMat = new THREE.MeshPhongMaterial({
+    color: 0x00e5c0,
+    transparent: true,
+    opacity: 0.3,
+    shininess: 100
+  });
+  const platform = new THREE.Mesh(platformGeo, platformMat);
+  platform.position.y = -0.25;
+  scene.add(platform);
+
+  // Glow ring
+  const glowGeo = new THREE.TorusGeometry(1, 0.02, 8, 64);
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: 0x00e5c0,
+    transparent: true,
+    opacity: 0.4
+  });
+  const glowRing = new THREE.Mesh(glowGeo, glowMat);
+  glowRing.position.y = -0.23;
+  glowRing.rotation.x = Math.PI / 2;
+  scene.add(glowRing);
+
+  // Animation
+  let time = 0;
+  function animate(){
+    requestAnimationFrame(animate);
+    time += 0.02;
+
+    // Gentle floating animation
+    humanGroup.position.y = Math.sin(time) * 0.05;
+    humanGroup.rotation.y = Math.sin(time * 0.3) * 0.15;
+
+    // Arm sway
+    leftArm.rotation.z = 0.3 + Math.sin(time * 1.5) * 0.1;
+    rightArm.rotation.z = -0.3 - Math.sin(time * 1.5) * 0.1;
+
+    // Platform pulse
+    const scale = 1 + Math.sin(time * 2) * 0.05;
+    platform.scale.set(scale, 1, scale);
+    glowRing.scale.set(scale * 1.2, 1, scale * 1.2);
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // Handle resize
+  window.addEventListener('resize', () => {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
+})();
+</script>
 
 </body>
 </html>

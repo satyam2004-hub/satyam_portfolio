@@ -1136,3 +1136,29 @@ footer {
     padding: 0.8rem 1.5rem;
   }
 }
+
+/* HUMAN 3D MODEL CONTAINER */
+#human-3d-container {
+  position: absolute;
+  top: 50%;
+  right: 5%;
+  transform: translateY(-50%);
+  width: 280px;
+  height: 450px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@media (max-width: 1200px) {
+  #human-3d-container {
+    width: 220px;
+    height: 380px;
+    right: 2%;
+  }
+}
+
+@media (max-width: 768px) {
+  #human-3d-container {
+    display: none;
+  }
+}
