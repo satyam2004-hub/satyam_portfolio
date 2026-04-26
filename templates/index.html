@@ -1,48 +1,806 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="{{ data.name }} - {{ data.tagline }}. Portfolio showcasing projects in game development, web development, and IoT systems."/>
-  <meta name="keywords" content="Satyam Sapkota, Portfolio, Game Developer, Full Stack Developer, Python, Django, Unity, PHP, IoT"/>
-  <meta name="author" content="{{ data.name }}"/>
-  <meta name="theme-color" content="#0b0e13"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Satyam Sapkota — IT Graduate · Game Developer · Full Stack Developer. Portfolio showcasing projects in game development, web development, and IoT systems."/>
+<title>Satyam Sapkota — Digital Dreamscape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=IBM+Plex+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --void: #02030a;
+  --deep: #060916;
+  --surface: #0a0f1e;
+  --panel: rgba(10,15,35,0.85);
+  --cyan: #00f5e4;
+  --magenta: #e040fb;
+  --violet: #7c4dff;
+  --ice: #b8fff9;
+  --glow-c: rgba(0,245,228,0.15);
+  --glow-m: rgba(224,64,251,0.12);
+  --text: #c8d8f0;
+  --muted: #4a6080;
+  --heading: #eef4ff;
+  --border: rgba(0,245,228,0.08);
+  --border-hot: rgba(0,245,228,0.3);
+}
 
-  <!-- Open Graph / Social Media -->
-  <meta property="og:type" content="website"/>
-  <meta property="og:title" content="{{ data.name }} — Portfolio"/>
-  <meta property="og:description" content="{{ data.tagline }} | {{ data.location }}"/>
-  <meta property="og:site_name" content="{{ data.name }} Portfolio"/>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <title>{{ data.name }} — Portfolio</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--void);
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CUSTOM CURSOR */
+.cursor-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--cyan);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s, opacity 0.2s;
+  box-shadow: 0 0 12px var(--cyan), 0 0 24px rgba(0,245,228,0.4);
+}
+.cursor-ring {
+  position: fixed;
+  width: 36px; height: 36px;
+  border: 1px solid rgba(0,245,228,0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s ease, width 0.2s, height 0.2s, border-color 0.2s;
+}
+.cursor-ring.hovering {
+  width: 60px; height: 60px;
+  border-color: var(--magenta);
+}
+
+/* LOADING SCREEN */
+.loading {
+  position: fixed; inset: 0;
+  background: var(--void);
+  z-index: 10000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2rem;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.loading.hidden { opacity: 0; visibility: hidden; }
+.loading-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.2rem;
+  letter-spacing: 0.4em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fadeIn 0.5s 0.3s ease forwards;
+}
+.loading-bar-track {
+  width: 240px; height: 1px;
+  background: rgba(0,245,228,0.1);
+  position: relative;
+}
+.loading-bar {
+  height: 1px;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  width: 0%;
+  animation: loadBar 1.4s 0.2s ease forwards;
+  box-shadow: 0 0 8px var(--cyan);
+}
+.loading-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  opacity: 0;
+  animation: fadeIn 0.5s 0.6s ease forwards;
+}
+@keyframes loadBar { to { width: 100%; } }
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* CANVAS BACKGROUND */
+#bgCanvas {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+
+/* NAVIGATION */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 500;
+  padding: 1.5rem 5%;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(24px) saturate(160%);
+  background: rgba(2,3,10,0.6);
+  transition: background 0.3s;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 0.75rem;
+  text-decoration: none;
+}
+.logo-hex {
+  width: 40px; height: 40px;
+  background: conic-gradient(from 0deg, var(--cyan), var(--violet), var(--magenta), var(--cyan));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex; align-items: center; justify-content: center;
+  animation: spinSlow 8s linear infinite;
+  flex-shrink: 0;
+}
+.logo-hex span {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem; font-weight: 700;
+  color: #000;
+  position: relative; z-index: 1;
+}
+.logo-text-main {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem; font-weight: 700;
+  color: var(--heading);
+  letter-spacing: 0.05em;
+}
+.logo-text-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--cyan);
+  letter-spacing: 0.12em;
+}
+@keyframes spinSlow { to { filter: hue-rotate(360deg); } }
+
+.nav-links {
+  display: flex; align-items: center; gap: 2.5rem;
+  list-style: none;
+}
+.nav-links a {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  position: relative;
+  transition: color 0.2s;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute; bottom: -4px; left: 0; right: 0;
+  height: 1px;
+  background: var(--cyan);
+  transform: scaleX(0);
+  transition: transform 0.2s;
+  box-shadow: 0 0 6px var(--cyan);
+}
+.nav-links a:hover, .nav-links a.active { color: var(--cyan); }
+.nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+
+.nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+.nav-social-icon {
+  width: 32px; height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted);
+  text-decoration: none;
+  transition: all 0.2s;
+  fill: currentColor;
+}
+.nav-social-icon:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0,245,228,0.2);
+  transform: translateY(-2px);
+}
+.nav-social-icon svg { width: 14px; height: 14px; fill: currentColor; }
+
+.hamburger {
+  display: none;
+  flex-direction: column; gap: 5px;
+  background: none; border: none;
+  cursor: none; padding: 5px;
+}
+.hamburger span {
+  width: 22px; height: 1.5px;
+  background: var(--cyan);
+  transition: all 0.3s;
+  border-radius: 2px;
+  display: block;
+}
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+.mobile-menu {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(2,3,10,0.97);
+  z-index: 490;
+  padding-top: 100px;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 2.5rem;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+.mobile-menu.open { opacity: 1; visibility: visible; }
+.mobile-menu a {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.2rem; letter-spacing: 0.2em;
+  color: var(--text); text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.mobile-menu a:hover { color: var(--cyan); }
+
+/* HERO */
+#hero {
+  min-height: 100vh;
+  display: flex; align-items: center;
+  padding: 8rem 5% 4rem;
+  position: relative; overflow: hidden;
+}
+
+#morphCanvas {
+  position: absolute;
+  top: 50%; right: 0;
+  transform: translateY(-50%);
+  width: 55vw; height: 100vh;
+  z-index: 1; pointer-events: none;
+}
+
+.hero-content {
+  position: relative; z-index: 2;
+  max-width: 580px;
+}
+
+.status-badge {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  padding: 0.4rem 1.2rem;
+  border: 1px solid rgba(0,245,228,0.2);
+  background: rgba(0,245,228,0.04);
+  border-radius: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 0.15em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 1.8rem;
+}
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  animation: blink 1.5s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero-name {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(2.4rem, 5.5vw, 5rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--heading);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.3rem;
+}
+.hero-name .glitch {
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(135deg, var(--cyan) 0%, var(--violet) 50%, var(--magenta) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-tagline {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  margin-bottom: 2.5rem;
+  line-height: 1.9;
+}
+.hero-tagline .sep { color: var(--violet); margin: 0 0.5rem; }
+.hero-tagline .hi { color: var(--cyan); }
+
+.cta-group { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 1.8rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem; font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 2px;
+  cursor: none;
+  transition: all 0.25s;
+  border: none;
+}
+.btn-cyber {
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  color: #000; font-weight: 600;
+  position: relative; overflow: hidden;
+}
+.btn-cyber::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--magenta), var(--cyan));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.btn-cyber:hover::after { opacity: 1; }
+.btn-cyber:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,245,228,0.25); }
+.btn-cyber span { position: relative; z-index: 1; }
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-hot);
+}
+.btn-ghost:hover {
+  background: rgba(0,245,228,0.06);
+  color: var(--cyan);
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0,245,228,0.1);
+}
+
+.hero-stats {
+  display: flex; gap: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+.stat-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.6rem; font-weight: 700;
+  color: var(--cyan);
+}
+.stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem; letter-spacing: 0.12em;
+  color: var(--muted); text-transform: uppercase;
+}
+
+/* SECTION BASE */
+section { padding: 7rem 5%; position: relative; z-index: 2; }
+.section-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 0.2em;
+  color: var(--cyan); text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.section-eyebrow::before {
+  content: '';
+  width: 30px; height: 1px;
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+}
+h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 700;
+  color: var(--heading);
+  letter-spacing: -0.01em;
+  margin-bottom: 3rem;
+}
+
+/* ABOUT */
+#about { background: rgba(10,15,35,0.4); }
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem; align-items: start;
+}
+.about-body {
+  font-size: 1.05rem; line-height: 1.8;
+  color: rgba(200,216,240,0.75);
+  margin-bottom: 2rem;
+}
+.about-body + .about-body { margin-bottom: 0; }
+.info-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+}
+.info-card {
+  background: rgba(0,245,228,0.03);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.1rem 1.2rem;
+  transition: border-color 0.2s;
+}
+.info-card:hover { border-color: rgba(0,245,228,0.2); }
+.info-card-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem; letter-spacing: 0.15em;
+  color: var(--cyan); text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+.info-card-value {
+  font-size: 0.92rem; font-weight: 600;
+  color: var(--heading);
+}
+
+/* EDUCATION */
+.edu-panel {
+  background: rgba(124,77,255,0.04);
+  border: 1px solid rgba(124,77,255,0.15);
+  border-radius: 6px;
+  padding: 2.5rem;
+  max-width: 800px;
+  position: relative; overflow: hidden;
+}
+.edu-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--violet), var(--magenta), var(--cyan));
+}
+.edu-degree {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.2rem; font-weight: 700;
+  color: var(--heading);
+  margin-bottom: 0.5rem;
+}
+.edu-inst {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem; color: var(--violet);
+  margin-bottom: 0.25rem;
+}
+.edu-affil { font-size: 0.88rem; color: var(--muted); margin-bottom: 2rem; }
+.edu-badge {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  border: 1px solid rgba(124,77,255,0.3);
+  background: rgba(124,77,255,0.06);
+  border-radius: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 0.12em;
+  color: var(--violet); text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+.edu-stats { display: flex; gap: 3rem; }
+.edu-stat-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 2rem; font-weight: 700;
+  color: var(--violet);
+}
+.edu-stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem; letter-spacing: 0.1em;
+  color: var(--muted); text-transform: uppercase;
+}
+
+/* EXPERIENCE */
+#experience { background: rgba(10,15,35,0.4); }
+.timeline { display: flex; flex-direction: column; gap: 1.5rem; max-width: 820px; }
+.exp-card {
+  background: rgba(6,9,22,0.7);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2rem 2.2rem;
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.exp-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: linear-gradient(180deg, var(--cyan), var(--violet));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.exp-card:hover { border-color: rgba(0,245,228,0.2); transform: translateX(6px); }
+.exp-card:hover::before { opacity: 1; }
+.exp-header {
+  display: flex; align-items: flex-start;
+  gap: 1.2rem; margin-bottom: 1.2rem;
+}
+.exp-icon-wrap {
+  width: 44px; height: 44px; flex-shrink: 0;
+  background: rgba(0,245,228,0.05);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+}
+.exp-role {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.95rem; font-weight: 700;
+  color: var(--heading); margin-bottom: 0.25rem;
+}
+.exp-company {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem; color: var(--cyan);
+}
+.exp-year {
+  margin-left: auto; flex-shrink: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem; color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0.25rem 0.75rem;
+}
+.exp-points { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.exp-points li {
+  font-size: 0.9rem; color: rgba(200,216,240,0.65);
+  padding-left: 1.4rem; position: relative;
+}
+.exp-points li::before {
+  content: '▸';
+  position: absolute; left: 0;
+  color: var(--cyan); font-size: 0.8rem;
+}
+
+/* PROJECTS */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.5rem;
+}
+.proj-card {
+  background: rgba(6,9,22,0.8);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2rem;
+  display: flex; flex-direction: column;
+  transition: border-color 0.3s, transform 0.4s, box-shadow 0.4s;
+  position: relative; overflow: hidden;
+}
+.proj-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 0% 0%, rgba(0,245,228,0.04) 0%, transparent 60%);
+  opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
+}
+.proj-card:hover {
+  border-color: rgba(224,64,251,0.25);
+  transform: translateY(-8px);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.4), 0 0 30px rgba(224,64,251,0.06);
+}
+.proj-card:hover::after { opacity: 1; }
+.proj-emoji { font-size: 2rem; margin-bottom: 1.2rem; }
+.proj-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.92rem; font-weight: 700;
+  color: var(--heading); margin-bottom: 0.3rem;
+}
+.proj-tech {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 0.08em;
+  color: var(--magenta); margin-bottom: 1rem;
+}
+.proj-desc {
+  font-size: 0.88rem; line-height: 1.7;
+  color: rgba(200,216,240,0.6);
+  flex: 1; margin-bottom: 1.5rem;
+}
+.proj-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.proj-link {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 0.08em;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.proj-link:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0,245,228,0.1);
+}
+.proj-link svg { width: 11px; height: 11px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+/* SKILLS */
+#skills { background: rgba(10,15,35,0.4); }
+.skills-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+.skill-panel {
+  background: rgba(6,9,22,0.7);
+  border: 1px solid var(--border);
+  border-radius: 4px; padding: 2rem;
+}
+.skill-panel-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 0.18em;
+  color: var(--cyan); text-transform: uppercase;
+  margin-bottom: 1.2rem;
+}
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.tag {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text);
+  background: rgba(0,245,228,0.02);
+  transition: all 0.2s;
+  cursor: default;
+}
+.tag:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(0,245,228,0.04);
+  box-shadow: 0 0 8px rgba(0,245,228,0.08);
+}
+.soft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+.soft-item {
+  padding: 0.8rem 1.2rem;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--magenta);
+  border-radius: 2px;
+  font-size: 0.88rem; font-weight: 600;
+  color: var(--text);
+  background: rgba(224,64,251,0.02);
+}
+
+/* CONTACT */
+#contact { text-align: center; }
+.contact-inner { max-width: 580px; margin: 0 auto; }
+.contact-body {
+  font-size: 1rem; line-height: 1.8;
+  color: rgba(200,216,240,0.65);
+  margin-bottom: 3rem;
+}
+.contact-cards {
+  display: flex; justify-content: center; gap: 1.5rem;
+  flex-wrap: wrap; margin-bottom: 2rem;
+}
+.contact-card {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.9rem 1.5rem;
+  background: rgba(6,9,22,0.8);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  text-decoration: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+.contact-card:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,245,228,0.12);
+}
+.social-row {
+  display: flex; justify-content: center; gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+.social-btn {
+  width: 46px; height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); text-decoration: none;
+  transition: all 0.25s; fill: currentColor;
+}
+.social-btn:hover {
+  border-color: var(--cyan); color: var(--cyan);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0,245,228,0.12);
+}
+.social-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem 5%;
+  display: flex; justify-content: space-between;
+  align-items: center; flex-wrap: wrap; gap: 1rem;
+  position: relative; z-index: 2;
+}
+.footer-t {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 0.1em; color: var(--muted);
+}
+.footer-t .accent { color: var(--cyan); }
+
+/* SCROLL TOP */
+.scroll-top {
+  position: fixed; bottom: 2rem; right: 2rem;
+  width: 44px; height: 44px;
+  background: rgba(6,9,22,0.9);
+  border: 1px solid rgba(0,245,228,0.3);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--cyan); cursor: none;
+  opacity: 0; visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.3s;
+  z-index: 400;
+  box-shadow: 0 0 20px rgba(0,245,228,0.1);
+}
+.scroll-top.visible {
+  opacity: 1; visibility: visible;
+  transform: translateY(0);
+}
+.scroll-top:hover {
+  background: rgba(0,245,228,0.1);
+  transform: translateY(-3px);
+}
+.scroll-top svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+/* FADE ANIM */
+.fade-up {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-up.in { opacity: 1; transform: translateY(0); }
+
+/* SCANLINES overlay */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,245,228,0.012) 2px, rgba(0,245,228,0.012) 4px);
+  pointer-events: none; z-index: 1; opacity: 0.5;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .skills-cols { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .nav-links, .nav-actions { display: none; }
+  .hamburger { display: flex; }
+  .mobile-menu { display: flex; }
+  #morphCanvas { display: none; }
+  .hero-content { max-width: 100%; }
+  .projects-grid { grid-template-columns: 1fr; }
+  footer { flex-direction: column; text-align: center; }
+}
+@media (max-width: 480px) {
+  .cta-group { flex-direction: column; }
+  .btn { width: 100%; justify-content: center; }
+  .hero-stats { flex-wrap: wrap; gap: 1.5rem; }
+  .info-grid { grid-template-columns: 1fr; }
+}
+</style>
 </head>
 <body>
 
-<!-- Loading Screen -->
-<div class="loading-screen" id="loadingScreen">
-  <div class="loading-spinner"></div>
-  <div class="loading-text">Loading...</div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<div class="loading" id="loadingScreen">
+  <div class="loading-logo">Satyam Sapkota</div>
+  <div class="loading-bar-track"><div class="loading-bar"></div></div>
+  <div class="loading-sub">Initializing digital dreamscape...</div>
 </div>
 
-<!-- 3D Space Background Canvas -->
-<canvas id="canvas3d"></canvas>
+<canvas id="bgCanvas"></canvas>
+<canvas id="morphCanvas"></canvas>
 
-{% from "icons.html" import instagram, facebook, linkedin, github, external_link, download, arrow_up %}
-
-<nav>
+<!-- NAV -->
+<nav id="navbar">
   <a href="#hero" class="nav-logo">
-    <div class="nav-logo-icon">SS</div>
-    <div class="nav-logo-text">
-      <span class="nav-logo-name">Satyam Sapkota</span>
-      <span class="nav-logo-role">Dev & Creator</span>
+    <div class="logo-hex"><span>SS</span></div>
+    <div>
+      <div class="logo-text-main">Satyam</div>
+      <div class="logo-text-sub">Dev &amp; Creator</div>
     </div>
   </a>
-
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
     <li><a href="#experience">Experience</a></li>
@@ -50,524 +808,607 @@
     <li><a href="#skills">Skills</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
-
-  <div class="nav-social">
-    <a href="{{ data.social.instagram }}" target="_blank" rel="noopener noreferrer" title="Instagram">{{ instagram() }}</a>
-    <a href="{{ data.social.facebook }}" target="_blank" rel="noopener noreferrer" title="Facebook">{{ facebook() }}</a>
-    <a href="{{ data.social.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn">{{ linkedin() }}</a>
-    <a href="{{ data.social.github }}" target="_blank" rel="noopener noreferrer" title="GitHub">{{ github() }}</a>
+  <div class="nav-actions">
+    <a class="nav-social-icon" href="https://github.com/satyam2004-hub" target="_blank" rel="noopener" title="GitHub">
+      <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+    </a>
+    <a class="nav-social-icon" href="https://www.linkedin.com/in/satyam-sapkota-259022358/" target="_blank" rel="noopener" title="LinkedIn">
+      <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+    </a>
+    <a class="nav-social-icon" href="https://www.instagram.com/satyam__sapkota/?hl=en" target="_blank" rel="noopener" title="Instagram">
+      <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+    </a>
   </div>
-
-  <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-    <span></span>
-    <span></span>
-    <span></span>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
   </button>
 </nav>
 
-<!-- Mobile Menu -->
 <div class="mobile-menu" id="mobileMenu">
-  <ul class="mobile-nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#experience">Experience</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#skills">Skills</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <div class="mobile-social">
-    <a href="{{ data.social.instagram }}" target="_blank" rel="noopener noreferrer" title="Instagram">{{ instagram() }}</a>
-    <a href="{{ data.social.facebook }}" target="_blank" rel="noopener noreferrer" title="Facebook">{{ facebook() }}</a>
-    <a href="{{ data.social.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn">{{ linkedin() }}</a>
-    <a href="{{ data.social.github }}" target="_blank" rel="noopener noreferrer" title="GitHub">{{ github() }}</a>
-  </div>
+  <a href="#about" onclick="closeMobile()">About</a>
+  <a href="#experience" onclick="closeMobile()">Experience</a>
+  <a href="#projects" onclick="closeMobile()">Projects</a>
+  <a href="#skills" onclick="closeMobile()">Skills</a>
+  <a href="#contact" onclick="closeMobile()">Contact</a>
 </div>
 
-
+<!-- HERO -->
 <section id="hero">
-  <div class="hero-grid-bg"></div>
-  <div class="hero-glow"></div>
-  <div class="hero-glow2"></div>
-  <div id="human-3d-container"></div>
   <div class="hero-content">
-    <div class="hero-badge">
-      <span class="hero-badge-dot"></span>
+    <div class="status-badge">
+      <span class="status-dot"></span>
       Available for opportunities
     </div>
-    <h1>{{ data.name.split()[0] }}<br><span>{{ data.name.split()[1] }}</span></h1>
-    <p class="hero-tagline">
-      {{ data.tagline }} &nbsp;·&nbsp; {{ data.location }}
-    </p>
-    <div class="hero-social">
-      <a href="{{ data.social.instagram }}" target="_blank" rel="noopener noreferrer" title="Instagram">{{ instagram() }}</a>
-      <a href="{{ data.social.facebook }}" target="_blank" rel="noopener noreferrer" title="Facebook">{{ facebook() }}</a>
-      <a href="{{ data.social.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn">{{ linkedin() }}</a>
-      <a href="{{ data.social.github }}" target="_blank" rel="noopener noreferrer" title="GitHub">{{ github() }}</a>
+    <div class="hero-name">Satyam<br><span class="glitch">Sapkota</span></div>
+    <div class="hero-tagline">
+      <span class="hi">IT Graduate</span>
+      <span class="sep">/</span>
+      Game Developer
+      <span class="sep">/</span>
+      Full Stack Dev<br>
+      Bhaktapur, Kathmandu, Nepal
     </div>
-    <div class="hero-cta">
-      <a href="#projects" class="btn btn-primary">View Projects →</a>
-      <a href="mailto:{{ data.email }}" class="btn btn-outline">✉ Get In Touch</a>
-      {% if data.resume_url and data.resume_url != '#' %}
-      <a href="{{ data.resume_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
-        {{ download() }} Download Resume
-      </a>
-      {% endif %}
+    <div class="cta-group">
+      <a href="#projects" class="btn btn-cyber"><span>View Projects →</span></a>
+      <a href="mailto:satyam1sapkota@gmail.com" class="btn btn-ghost">✉ Get In Touch</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">2</div>
+        <div class="stat-label">Internships</div>
+      </div>
+      <div>
+        <div class="stat-num">4</div>
+        <div class="stat-label">Projects Built</div>
+      </div>
+      <div>
+        <div class="stat-num">3.39</div>
+        <div class="stat-label">Current GPA</div>
+      </div>
     </div>
   </div>
 </section>
 
-
+<!-- ABOUT -->
 <section id="about">
-  <div class="section-header">
-    <div class="section-label">About Me</div>
-    <h2>Crafting Digital Experiences</h2>
-  </div>
+  <div class="section-eyebrow">About Me</div>
+  <h2>Crafting Digital<br>Experiences</h2>
   <div class="about-grid">
-    <div class="about-text">
-      <p>{{ data.about }}</p>
-      <p>Currently pursuing my BIT degree while building real-world products — from Unity games to Django web apps and Arduino IoT systems.</p>
+    <div>
+      <p class="about-body">Motivated and results-driven IT graduate with hands-on experience in game development, web development, and IoT systems. Passionate about building innovative software solutions and committed to continuous learning and delivering high-quality digital products.</p>
+      <p class="about-body" style="margin-top:1rem;">Currently pursuing my BIT degree while building real-world products — from Unity games to Django web apps and Arduino IoT systems.</p>
     </div>
-    <div class="about-info">
-      <div class="info-item">
-        <div class="info-label">Location</div>
-        <div class="info-value">{{ data.location }}</div>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-label">Location</div>
+        <div class="info-card-value">Bhaktapur, Kathmandu</div>
       </div>
-      <div class="info-item">
-        <div class="info-label">Status</div>
-        <div class="info-value">Open to Work ✅</div>
+      <div class="info-card">
+        <div class="info-card-label">Status</div>
+        <div class="info-card-value">Open to Work ✅</div>
       </div>
-      <div class="info-item">
-        <div class="info-label">Current CGPA</div>
-        <div class="info-value">{{ data.education.cgpa_current }}</div>
+      <div class="info-card">
+        <div class="info-card-label">Current GPA</div>
+        <div class="info-card-value">3.39 / 4.0</div>
       </div>
-      <div class="info-item">
-        <div class="info-label">Languages</div>
-        <div class="info-value">{% for lang in data.languages %}{{ lang.lang }}{% if not loop.last %} · {% endif %}{% endfor %}</div>
+      <div class="info-card">
+        <div class="info-card-label">Languages</div>
+        <div class="info-card-value">Nepali · English</div>
       </div>
     </div>
   </div>
 </section>
 
-
+<!-- EDUCATION -->
 <section id="education">
-  <div class="section-header">
-    <div class="section-label">Education</div>
-    <h2>Academic Background</h2>
-  </div>
-  <div class="edu-card">
-    <span class="edu-duration">{{ data.education.duration }}</span>
-    <div class="edu-degree">{{ data.education.degree }}</div>
-    <div class="edu-inst">{{ data.education.institution }}</div>
-    <div class="edu-affil">{{ data.education.affiliation }} — {{ data.education.location }}</div>
+  <div class="section-eyebrow">Education</div>
+  <h2>Academic Background</h2>
+  <div class="edu-panel fade-up">
+    <div class="edu-badge">2022 – 2027/28 (Expected)</div>
+    <div class="edu-degree">Bachelor of Information Technology (BIT)</div>
+    <div class="edu-inst">Texas College of Management &amp; IT</div>
+    <div class="edu-affil">Affiliated to Lincoln University — Kathmandu, Nepal</div>
     <div class="edu-stats">
-      <div class="edu-stat">
-        <div class="edu-stat-val">{{ data.education.cgpa_current.split('/')[0].strip() }}</div>
+      <div>
+        <div class="edu-stat-num">3.39</div>
         <div class="edu-stat-label">Current GPA</div>
       </div>
-      <div class="edu-stat">
-        <div class="edu-stat-val">{{ data.education.cgpa_expected.split('/')[0].strip() }}</div>
+      <div>
+        <div class="edu-stat-num">3.5</div>
         <div class="edu-stat-label">Expected GPA</div>
       </div>
-      <div class="edu-stat">
-        <div class="edu-stat-val">4.0</div>
+      <div>
+        <div class="edu-stat-num">4.0</div>
         <div class="edu-stat-label">Scale</div>
       </div>
     </div>
   </div>
 </section>
 
-
+<!-- EXPERIENCE -->
 <section id="experience">
-  <div class="section-header">
-    <div class="section-label">Work Experience</div>
-    <h2>Where I've Worked</h2>
-  </div>
-  <div class="exp-timeline">
-    {% for exp in data.experience %}
-    <div class="exp-card">
+  <div class="section-eyebrow">Work Experience</div>
+  <h2>Where I've Worked</h2>
+  <div class="timeline">
+    <div class="exp-card fade-up">
       <div class="exp-header">
-        <div class="exp-icon">{{ exp.icon }}</div>
-        <div class="exp-meta">
-          <div class="exp-role">{{ exp.role }}</div>
-          <div class="exp-company">{{ exp.company }} — {{ exp.location }}</div>
+        <div class="exp-icon-wrap">🎮</div>
+        <div>
+          <div class="exp-role">Game Development Intern</div>
+          <div class="exp-company">Zuktitech — Kathmandu, Nepal</div>
         </div>
-        <div class="exp-year">{{ exp.year }}</div>
+        <div class="exp-year">2023</div>
       </div>
       <ul class="exp-points">
-        {% for point in exp.points %}
-        <li>{{ point }}</li>
-        {% endfor %}
+        <li>Developed 2D/3D game mechanics and interactive gameplay features using Unity Engine.</li>
+        <li>Collaborated with the team on game design, scripting in C#, and debugging.</li>
+        <li>Gained practical experience in game physics, animation, and scene management.</li>
+        <li>Participated in sprint planning, code reviews, and iterative development cycles.</li>
       </ul>
     </div>
-    {% endfor %}
+    <div class="exp-card fade-up">
+      <div class="exp-header">
+        <div class="exp-icon-wrap">💻</div>
+        <div>
+          <div class="exp-role">PHP Developer Intern</div>
+          <div class="exp-company">Texas Imagionology — Kathmandu, Nepal</div>
+        </div>
+        <div class="exp-year">2024</div>
+      </div>
+      <ul class="exp-points">
+        <li>Developed and maintained PHP-based web applications including a college news portal.</li>
+        <li>Designed and managed MySQL databases for dynamic content management.</li>
+        <li>Built responsive front-end interfaces using HTML, CSS, and JavaScript.</li>
+        <li>Contributed to the full software development lifecycle from planning to deployment.</li>
+      </ul>
+    </div>
   </div>
 </section>
 
-
+<!-- PROJECTS -->
 <section id="projects">
-  <div class="section-header">
-    <div class="section-label">Projects</div>
-    <h2>Things I've Built</h2>
-  </div>
+  <div class="section-eyebrow">Projects</div>
+  <h2>Things I've Built</h2>
   <div class="projects-grid">
-    {% for proj in data.projects %}
-    <div class="proj-card">
-      <div class="proj-emoji">{{ proj.emoji }}</div>
-      <div class="proj-name">{{ proj.name }}</div>
-      <div class="proj-tech">{{ proj.tech }}</div>
-      <div class="proj-desc">{{ proj.desc }}</div>
+    <div class="proj-card fade-up">
+      <div class="proj-emoji">📚</div>
+      <div class="proj-name">Online Book Delivery System</div>
+      <div class="proj-tech">Django / Python</div>
+      <div class="proj-desc">Full-stack web application enabling users to browse, order, and track book deliveries online. Built with Django framework, SQLite database, and responsive HTML/CSS front-end.</div>
       <div class="proj-links">
-        {% if proj.demo_url and proj.demo_url != '#' %}
-        <a href="{{ proj.demo_url }}" target="_blank" rel="noopener noreferrer" class="proj-link">
-          {{ external_link() }} Live Demo
+        <a href="https://github.com/satyam2004-hub" target="_blank" class="proj-link">
+          <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          Source Code
         </a>
-        {% endif %}
-        {% if proj.repo_url and proj.repo_url != '#' %}
-        <a href="{{ proj.repo_url }}" target="_blank" rel="noopener noreferrer" class="proj-link">
-          {{ github() }} Source Code
-        </a>
-        {% endif %}
       </div>
     </div>
-    {% endfor %}
+    <div class="proj-card fade-up">
+      <div class="proj-emoji">🅿️</div>
+      <div class="proj-name">Smart Parking System</div>
+      <div class="proj-tech">Arduino / IoT</div>
+      <div class="proj-desc">IoT-based automated smart parking system using ultrasonic sensors and Arduino microcontroller. Real-time parking slot detection and LED indicator system.</div>
+      <div class="proj-links">
+        <a href="https://github.com/satyam2004-hub" target="_blank" class="proj-link">
+          <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          Source Code
+        </a>
+      </div>
+    </div>
+    <div class="proj-card fade-up">
+      <div class="proj-emoji">📰</div>
+      <div class="proj-name">Texas News Portal</div>
+      <div class="proj-tech">PHP / MySQL</div>
+      <div class="proj-desc">College news portal with an admin panel for content management, user authentication, dynamic news categories, and a responsive UI layout.</div>
+      <div class="proj-links">
+        <a href="https://github.com/satyam2004-hub" target="_blank" class="proj-link">
+          <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          Source Code
+        </a>
+      </div>
+    </div>
+    <div class="proj-card fade-up">
+      <div class="proj-emoji">🌐</div>
+      <div class="proj-name">Portfolio Website</div>
+      <div class="proj-tech">WordPress / Python Flask</div>
+      <div class="proj-desc">Designed and deployed personal portfolio websites using WordPress with custom theme customization and a modern Flask-based version with a dark cosmic aesthetic.</div>
+      <div class="proj-links">
+        <a href="https://github.com/satyam2004-hub" target="_blank" class="proj-link">
+          <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
   </div>
 </section>
 
-
+<!-- SKILLS -->
 <section id="skills">
-  <div class="section-header">
-    <div class="section-label">Skills</div>
-    <h2>My Technical Arsenal</h2>
-  </div>
-  <div class="skills-grid">
-    {% for group, items in data.skills.items() %}
-    <div class="skill-group">
-      <div class="skill-group-title">{{ group }}</div>
-      <div class="skill-tags">
-        {% for skill in items %}
-        <span class="skill-tag">{{ skill }}</span>
-        {% endfor %}
+  <div class="section-eyebrow">Skills</div>
+  <h2>Technical Arsenal</h2>
+  <div class="skills-cols">
+    <div class="skill-panel">
+      <div class="skill-panel-title">Languages &amp; Frameworks</div>
+      <div class="tag-cloud">
+        <span class="tag">Python &amp; Django</span>
+        <span class="tag">PHP &amp; MySQL</span>
+        <span class="tag">Flutter</span>
+        <span class="tag">Unity (C#)</span>
+        <span class="tag">HTML5</span>
+        <span class="tag">CSS3</span>
+        <span class="tag">JavaScript</span>
       </div>
     </div>
-    {% endfor %}
+    <div class="skill-panel">
+      <div class="skill-panel-title">Tools &amp; Platforms</div>
+      <div class="tag-cloud">
+        <span class="tag">WordPress CMS</span>
+        <span class="tag">Git &amp; GitHub</span>
+        <span class="tag">IoT / Arduino</span>
+        <span class="tag">MySQL</span>
+        <span class="tag">SQLite</span>
+        <span class="tag">REST APIs</span>
+        <span class="tag">Flask</span>
+      </div>
+    </div>
   </div>
-  <div class="soft-skills-grid">
-    {% for s in data.soft_skills %}
-    <div class="soft-skill">{{ s }}</div>
-    {% endfor %}
+  <div class="soft-grid">
+    <div class="soft-item">Effective Communication</div>
+    <div class="soft-item">Team Collaboration</div>
+    <div class="soft-item">Problem-Solving</div>
+    <div class="soft-item">Time Management</div>
+    <div class="soft-item">Adaptability</div>
+    <div class="soft-item">Attention to Detail</div>
   </div>
 </section>
 
-
+<!-- CONTACT -->
 <section id="contact">
   <div class="contact-inner">
-    <div class="section-label" style="justify-content:center; display:flex;">Contact</div>
-    <h2>Let's Build Something</h2>
-    <p>I'm always open to new opportunities, collaborations, or just a good chat about tech. Reach out anytime!</p>
-    <div class="contact-links">
-      <a href="mailto:{{ data.email }}" class="contact-link">
-        ✉ {{ data.email }}
+    <div class="section-eyebrow" style="justify-content:center">Contact</div>
+    <h2>Let's Build<br>Something</h2>
+    <p class="contact-body">Always open to new opportunities, collaborations, or just a good chat about tech. Reach out anytime — I'm one message away.</p>
+    <div class="contact-cards">
+      <a href="mailto:satyam1sapkota@gmail.com" class="contact-card">✉ satyam1sapkota@gmail.com</a>
+      <a href="tel:9742870682" class="contact-card">📞 9742870682</a>
+    </div>
+    <div class="social-row">
+      <a class="social-btn" href="https://www.instagram.com/satyam__sapkota/?hl=en" target="_blank" title="Instagram">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
       </a>
-      <a href="tel:{{ data.phone }}" class="contact-link">
-        📞 {{ data.phone }}
+      <a class="social-btn" href="https://www.facebook.com/satyam.sapkota.92" target="_blank" title="Facebook">
+        <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </a>
+      <a class="social-btn" href="https://www.linkedin.com/in/satyam-sapkota-259022358/" target="_blank" title="LinkedIn">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      <a class="social-btn" href="https://github.com/satyam2004-hub" target="_blank" title="GitHub">
+        <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
       </a>
     </div>
-    <div class="contact-social">
-      <a href="{{ data.social.instagram }}" target="_blank" rel="noopener noreferrer" title="Instagram">{{ instagram() }}</a>
-      <a href="{{ data.social.facebook }}" target="_blank" rel="noopener noreferrer" title="Facebook">{{ facebook() }}</a>
-      <a href="{{ data.social.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn">{{ linkedin() }}</a>
-      <a href="{{ data.social.github }}" target="_blank" rel="noopener noreferrer" title="GitHub">{{ github() }}</a>
-    </div>
-    <a href="mailto:{{ data.email }}" class="btn btn-primary" style="font-size:1rem; padding:1rem 2.5rem;">
-      Say Hello →
-    </a>
+    <a href="mailto:satyam1sapkota@gmail.com" class="btn btn-cyber" style="font-size:0.85rem;padding:1rem 2.5rem;"><span>Say Hello →</span></a>
   </div>
 </section>
 
-
 <footer>
-  <div class="footer-text">© 2026 <span class="footer-accent">{{ data.name }}</span>. All rights reserved.</div>
-  <div class="footer-text">Built with <span class="footer-accent">Python</span> & Flask</div>
+  <div class="footer-t">© 2026 <span class="accent">Satyam Sapkota</span>. All rights reserved.</div>
+  <div class="footer-t">Built with <span class="accent">Python</span> &amp; Flask · Reimagined in <span class="accent">Hyperspace</span></div>
 </footer>
 
-<!-- Scroll to Top Button -->
 <button class="scroll-top" id="scrollTop" aria-label="Scroll to top">
-  {{ arrow_up() }}
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
 </button>
 
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
-
-<!-- 3D Space Background Script -->
 <script>
-(function(){
-  const canvas = document.getElementById('canvas3d');
-  if(!canvas) return;
+// CURSOR
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function animCursor() {
+  dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+document.querySelectorAll('a, button, .tag, .proj-card, .exp-card').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+});
 
-  const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true, alpha: true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x000000, 0);
+// LOADING
+setTimeout(() => {
+  document.getElementById('loadingScreen').classList.add('hidden');
+}, 1600);
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-  camera.position.z = 30;
+// MOBILE MENU
+const ham = document.getElementById('hamburger');
+const mob = document.getElementById('mobileMenu');
+ham.addEventListener('click', () => {
+  ham.classList.toggle('open');
+  mob.classList.toggle('open');
+});
+function closeMobile() {
+  ham.classList.remove('open');
+  mob.classList.remove('open');
+}
 
-  // Particle field
-  const geo = new THREE.BufferGeometry();
-  const count = 2000;
-  const positions = new Float32Array(count*3);
-  const colors = new Float32Array(count*3);
-  const c1 = new THREE.Color(0x00e5c0);
-  const c2 = new THREE.Color(0x7c6bff);
-  const c3 = new THREE.Color(0xff6b6b);
-  const palette = [c1, c2, c3];
-  for(let i=0;i<count;i++){
-    positions[i*3]   = (Math.random()-0.5)*80;
-    positions[i*3+1] = (Math.random()-0.5)*80;
-    positions[i*3+2] = (Math.random()-0.5)*80;
-    const col = palette[Math.floor(Math.random()*3)];
-    colors[i*3]   = col.r;
-    colors[i*3+1] = col.g;
-    colors[i*3+2] = col.b;
-  }
-  geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
-  geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
-  const mat = new THREE.PointsMaterial({size:0.12, vertexColors:true, transparent:true, opacity:0.7, sizeAttenuation:true});
-  const points = new THREE.Points(geo, mat);
-  scene.add(points);
+// SCROLL TOP
+const scrollBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => {
+  scrollBtn.classList.toggle('visible', window.scrollY > 500);
+});
+scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-  // Wireframe icosahedron
-  const icoGeo = new THREE.IcosahedronGeometry(8, 1);
-  const icoMat = new THREE.MeshBasicMaterial({color:0x00e5c0, wireframe:true, transparent:true, opacity:0.04});
-  const ico = new THREE.Mesh(icoGeo, icoMat);
-  scene.add(ico);
+// NAV ACTIVE
+const sections = document.querySelectorAll('section[id]');
+const navAs = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) cur = s.id; });
+  navAs.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + cur); });
+});
 
-  // Secondary torus
-  const torusGeo = new THREE.TorusGeometry(12, 0.08, 8, 60);
-  const torusMat = new THREE.MeshBasicMaterial({color:0x7c6bff, transparent:true, opacity:0.08});
-  const torus = new THREE.Mesh(torusGeo, torusMat);
-  torus.rotation.x = Math.PI/3;
-  scene.add(torus);
+// FADE UP OBSERVER
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach((el, i) => {
+  el.style.transitionDelay = (i % 4) * 0.1 + 's';
+  obs.observe(el);
+});
 
-  const torus2 = new THREE.Mesh(
-    new THREE.TorusGeometry(18, 0.06, 8, 80),
-    new THREE.MeshBasicMaterial({color:0x00e5c0, transparent:true, opacity:0.05})
-  );
-  torus2.rotation.x = Math.PI/5;
-  torus2.rotation.y = Math.PI/4;
-  scene.add(torus2);
-
-  let mouse = {x:0, y:0};
-  document.addEventListener('mousemove', e=>{
-    mouse.x = (e.clientX/window.innerWidth - 0.5)*2;
-    mouse.y = -(e.clientY/window.innerHeight - 0.5)*2;
+// SMOOTH ANCHOR
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const href = a.getAttribute('href');
+    if (href !== '#') {
+      e.preventDefault();
+      const t = document.querySelector(href);
+      if (t) window.scrollTo({ top: t.offsetTop - 80, behavior: 'smooth' });
+    }
   });
+});
 
-  window.addEventListener('resize', ()=>{
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-
-  let t=0;
-  function animate(){
-    requestAnimationFrame(animate);
-    t += 0.005;
-    points.rotation.y = t*0.08 + mouse.x*0.1;
-    points.rotation.x = mouse.y*0.05;
-    ico.rotation.x = t*0.15;
-    ico.rotation.y = t*0.2;
-    torus.rotation.z = t*0.1;
-    torus2.rotation.y = t*0.07;
-    camera.position.x += (mouse.x*3 - camera.position.x)*0.02;
-    camera.position.y += (mouse.y*2 - camera.position.y)*0.02;
-    renderer.render(scene,camera);
+// BG PARTICLE FIELD
+(function() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  for (let i = 0; i < 120; i++) {
+    particles.push({
+      x: Math.random() * 2000, y: Math.random() * 2000,
+      vx: (Math.random() - 0.5) * 0.15, vy: (Math.random() - 0.5) * 0.15,
+      r: Math.random() * 1.2 + 0.3,
+      col: ['rgba(0,245,228,', 'rgba(224,64,251,', 'rgba(124,77,255,'][Math.floor(Math.random()*3)],
+      a: Math.random() * 0.5 + 0.1
+    });
   }
-  animate();
+  let t = 0;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    // Grid lines
+    ctx.strokeStyle = 'rgba(0,245,228,0.025)';
+    ctx.lineWidth = 0.5;
+    const gSize = 80;
+    for (let x = 0; x < W; x += gSize) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += gSize) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    // Particles
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.col + p.a + ')';
+      ctx.fill();
+    });
+    // Glow orbs
+    const g1 = ctx.createRadialGradient(W*0.8, H*0.2, 0, W*0.8, H*0.2, 300);
+    g1.addColorStop(0, 'rgba(0,245,228,0.06)');
+    g1.addColorStop(1, 'transparent');
+    ctx.fillStyle = g1; ctx.fillRect(0,0,W,H);
+    const g2 = ctx.createRadialGradient(W*0.15, H*0.7, 0, W*0.15, H*0.7, 250);
+    g2.addColorStop(0, 'rgba(124,77,255,0.05)');
+    g2.addColorStop(1, 'transparent');
+    ctx.fillStyle = g2; ctx.fillRect(0,0,W,H);
+    t++;
+    requestAnimationFrame(draw);
+  }
+  draw();
 })();
-</script>
 
-<!-- 3D Human Model Script -->
-<script>
-(function(){
-  const container = document.getElementById('human-3d-container');
-  if(!container) return;
+// MORPHING BLOB (Three.js)
+(function() {
+  const canvas = document.getElementById('morphCanvas');
+  if (!canvas || typeof THREE === 'undefined') return;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+  renderer.setClearColor(0x000000, 0);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight, 0.1, 100);
-  camera.position.set(0, 1, 5);
-  camera.lookAt(0, 0, 0);
+  const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+  camera.position.set(0, 0, 6);
 
-  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setClearColor(0x000000, 0);
-  container.appendChild(renderer.domElement);
+  // Main blob geometry — icosahedron with vertex morphing
+  const geo = new THREE.IcosahedronGeometry(2, 6);
+  const posAttr = geo.attributes.position;
+  const origPos = posAttr.array.slice();
+  const normals = new Float32Array(posAttr.count * 3);
+  for (let i = 0; i < posAttr.count; i++) {
+    const x = origPos[i*3], y = origPos[i*3+1], z = origPos[i*3+2];
+    const len = Math.sqrt(x*x + y*y + z*z);
+    normals[i*3] = x/len; normals[i*3+1] = y/len; normals[i*3+2] = z/len;
+  }
 
-  // Create human figure from geometric shapes
-  const humanGroup = new THREE.Group();
+  // Shader material for iridescent effect
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+    },
+    vertexShader: `
+      uniform float uTime;
+      uniform vec2 uMouse;
+      varying vec3 vNormal;
+      varying vec3 vPos;
+      varying float vDisplace;
 
-  // Materials
-  const skinMat = new THREE.MeshPhongMaterial({color: 0xffdbac, shininess: 30});
-  const shirtMat = new THREE.MeshPhongMaterial({color: 0x00e5c0, shininess: 50});
-  const pantsMat = new THREE.MeshPhongMaterial({color: 0x1a1a2e, shininess: 20});
-  const hairMat = new THREE.MeshPhongMaterial({color: 0x2d1810, shininess: 15});
-  const shoeMat = new THREE.MeshPhongMaterial({color: 0x333333, shininess: 25});
+      float hash(vec3 p) {
+        p = fract(p * 0.3183099 + 0.1);
+        p *= 17.0;
+        return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+      }
+      float noise(vec3 x) {
+        vec3 i = floor(x);
+        vec3 f = fract(x);
+        f = f*f*(3.0-2.0*f);
+        return mix(mix(mix(hash(i+vec3(0,0,0)),hash(i+vec3(1,0,0)),f.x),
+                       mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
+                   mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),
+                       mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);
+      }
+      void main() {
+        vNormal = normal;
+        float t = uTime * 0.4;
+        vec3 p = position * 0.8;
+        float d1 = noise(p + vec3(t * 0.3, t * 0.2, t * 0.15)) * 0.6;
+        float d2 = noise(p * 2.0 + vec3(t * 0.5, t * -0.3, t * 0.2)) * 0.3;
+        float d3 = noise(p * 4.0 + vec3(t * 0.2, t * 0.4, t * -0.35)) * 0.15;
+        float disp = d1 + d2 + d3;
+        vDisplace = disp;
+        vec3 displaced = position + normal * disp * 0.55;
+        vPos = displaced;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float uTime;
+      varying vec3 vNormal;
+      varying vec3 vPos;
+      varying float vDisplace;
 
-  // Head
-  const headGeo = new THREE.SphereGeometry(0.35, 32, 32);
-  const head = new THREE.Mesh(headGeo, skinMat);
-  head.position.y = 1.6;
-  humanGroup.add(head);
-
-  // Hair
-  const hairGeo = new THREE.SphereGeometry(0.37, 32, 32, 0, Math.PI * 2, 0, Math.PI * 0.4);
-  const hair = new THREE.Mesh(hairGeo, hairMat);
-  hair.position.y = 1.65;
-  hair.rotation.x = -0.1;
-  humanGroup.add(hair);
-
-  // Eyes
-  const eyeGeo = new THREE.SphereGeometry(0.04, 16, 16);
-  const eyeMat = new THREE.MeshPhongMaterial({color: 0x1a1a1a, shininess: 80});
-  const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-  leftEye.position.set(-0.12, 1.62, 0.3);
-  humanGroup.add(leftEye);
-  const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-  rightEye.position.set(0.12, 1.62, 0.3);
-  humanGroup.add(rightEye);
-
-  // Torso
-  const torsoGeo = new THREE.CylinderGeometry(0.3, 0.25, 0.7, 16);
-  const torso = new THREE.Mesh(torsoGeo, shirtMat);
-  torso.position.y = 1.0;
-  humanGroup.add(torso);
-
-  // Shoulders
-  const shoulderGeo = new THREE.CylinderGeometry(0.32, 0.3, 0.15, 16);
-  const shoulders = new THREE.Mesh(shoulderGeo, shirtMat);
-  shoulders.position.y = 1.3;
-  shoulders.rotation.z = Math.PI / 2;
-  humanGroup.add(shoulders);
-
-  // Left Arm
-  const armGeo = new THREE.CylinderGeometry(0.08, 0.07, 0.5, 12);
-  const leftArm = new THREE.Mesh(armGeo, shirtMat);
-  leftArm.position.set(-0.45, 1.1, 0);
-  leftArm.rotation.z = 0.3;
-  humanGroup.add(leftArm);
-
-  // Right Arm
-  const rightArm = new THREE.Mesh(armGeo, shirtMat);
-  rightArm.position.set(0.45, 1.1, 0);
-  rightArm.rotation.z = -0.3;
-  humanGroup.add(rightArm);
-
-  // Hands
-  const handGeo = new THREE.SphereGeometry(0.08, 12, 12);
-  const leftHand = new THREE.Mesh(handGeo, skinMat);
-  leftHand.position.set(-0.5, 0.83, 0);
-  humanGroup.add(leftHand);
-  const rightHand = new THREE.Mesh(handGeo, skinMat);
-  rightHand.position.set(0.5, 0.83, 0);
-  humanGroup.add(rightHand);
-
-  // Pants/Hips
-  const hipsGeo = new THREE.CylinderGeometry(0.25, 0.22, 0.2, 16);
-  const hips = new THREE.Mesh(hipsGeo, pantsMat);
-  hips.position.y = 0.65;
-  humanGroup.add(hips);
-
-  // Left Leg
-  const legGeo = new THREE.CylinderGeometry(0.1, 0.08, 0.7, 12);
-  const leftLeg = new THREE.Mesh(legGeo, pantsMat);
-  leftLeg.position.set(-0.12, 0.2, 0);
-  humanGroup.add(leftLeg);
-
-  // Right Leg
-  const rightLeg = new THREE.Mesh(legGeo, pantsMat);
-  rightLeg.position.set(0.12, 0.2, 0);
-  humanGroup.add(rightLeg);
-
-  // Shoes
-  const shoeGeo = new THREE.BoxGeometry(0.15, 0.08, 0.25);
-  const leftShoe = new THREE.Mesh(shoeGeo, shoeMat);
-  leftShoe.position.set(-0.12, -0.2, 0.03);
-  humanGroup.add(leftShoe);
-  const rightShoe = new THREE.Mesh(shoeGeo, shoeMat);
-  rightShoe.position.set(0.12, -0.2, 0.03);
-  humanGroup.add(rightShoe);
-
-  scene.add(humanGroup);
-
-  // Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-  scene.add(ambientLight);
-
-  const dirLight = new THREE.DirectionalLight(0x00e5c0, 0.8);
-  dirLight.position.set(2, 3, 4);
-  scene.add(dirLight);
-
-  const dirLight2 = new THREE.DirectionalLight(0x7c6bff, 0.4);
-  dirLight2.position.set(-2, 1, -2);
-  scene.add(dirLight2);
-
-  // Floating platform
-  const platformGeo = new THREE.CylinderGeometry(0.8, 0.9, 0.05, 32);
-  const platformMat = new THREE.MeshPhongMaterial({
-    color: 0x00e5c0,
+      void main() {
+        vec3 n = normalize(vNormal);
+        float fresnel = pow(1.0 - abs(dot(n, vec3(0.0, 0.0, 1.0))), 2.5);
+        // Iridescent color shift
+        float hue = vDisplace * 3.0 + uTime * 0.2 + vPos.y * 0.5;
+        vec3 col1 = vec3(0.0, 0.96, 0.9);   // cyan
+        vec3 col2 = vec3(0.49, 0.30, 1.0);  // violet
+        vec3 col3 = vec3(0.88, 0.25, 0.98); // magenta
+        float t1 = sin(hue) * 0.5 + 0.5;
+        float t2 = sin(hue + 2.094) * 0.5 + 0.5;
+        float t3 = sin(hue + 4.189) * 0.5 + 0.5;
+        vec3 baseCol = col1 * t1 + col2 * t2 + col3 * t3;
+        baseCol = normalize(baseCol) * 0.9;
+        // Add fresnel glow
+        vec3 finalCol = mix(baseCol * 0.3, baseCol, fresnel * 0.8 + 0.2);
+        finalCol += vec3(0.0, 0.96, 0.9) * fresnel * 0.4;
+        float alpha = 0.65 + fresnel * 0.35;
+        gl_FragColor = vec4(finalCol, alpha);
+      }
+    `,
     transparent: true,
-    opacity: 0.3,
-    shininess: 100
+    side: THREE.FrontSide,
+    depthWrite: false,
   });
-  const platform = new THREE.Mesh(platformGeo, platformMat);
-  platform.position.y = -0.25;
-  scene.add(platform);
 
-  // Glow ring
-  const glowGeo = new THREE.TorusGeometry(1, 0.02, 8, 64);
-  const glowMat = new THREE.MeshBasicMaterial({
-    color: 0x00e5c0,
-    transparent: true,
-    opacity: 0.4
+  const blob = new THREE.Mesh(geo, mat);
+  scene.add(blob);
+
+  // Wireframe shell
+  const wireGeo = new THREE.IcosahedronGeometry(2.3, 2);
+  const wireMat = new THREE.MeshBasicMaterial({
+    color: 0x00f5e4, wireframe: true, transparent: true, opacity: 0.04
   });
-  const glowRing = new THREE.Mesh(glowGeo, glowMat);
-  glowRing.position.y = -0.23;
-  glowRing.rotation.x = Math.PI / 2;
-  scene.add(glowRing);
+  const wire = new THREE.Mesh(wireGeo, wireMat);
+  scene.add(wire);
 
-  // Animation
+  // Floating rings
+  const rings = [];
+  const ringColors = [0x00f5e4, 0xe040fb, 0x7c4dff];
+  [3.2, 3.8, 4.5].forEach((r, i) => {
+    const rg = new THREE.TorusGeometry(r, 0.015, 8, 100);
+    const rm = new THREE.MeshBasicMaterial({ color: ringColors[i], transparent: true, opacity: 0.15 });
+    const ring = new THREE.Mesh(rg, rm);
+    ring.rotation.x = Math.PI / 3 + i * 0.4;
+    ring.rotation.y = i * 0.7;
+    rings.push(ring);
+    scene.add(ring);
+  });
+
+  // Particle field around blob
+  const pGeo = new THREE.BufferGeometry();
+  const pCount = 600;
+  const pPos = new Float32Array(pCount * 3);
+  for (let i = 0; i < pCount; i++) {
+    const r = 3.5 + Math.random() * 3;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    pPos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+    pPos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    pPos[i*3+2] = r * Math.cos(phi);
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  const pMat = new THREE.PointsMaterial({ color: 0x00f5e4, size: 0.025, transparent: true, opacity: 0.5 });
+  const pts = new THREE.Points(pGeo, pMat);
+  scene.add(pts);
+
+  // Lights
+  scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+  const dl = new THREE.DirectionalLight(0x00f5e4, 1.5);
+  dl.position.set(3, 3, 3);
+  scene.add(dl);
+  const dl2 = new THREE.DirectionalLight(0xe040fb, 0.8);
+  dl2.position.set(-3, -1, 2);
+  scene.add(dl2);
+
+  let mouseX = 0, mouseY = 0;
+  document.addEventListener('mousemove', e => {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  function onResize() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }
+  window.addEventListener('resize', onResize);
+
   let time = 0;
-  function animate(){
+  function animate() {
     requestAnimationFrame(animate);
-    time += 0.02;
+    time += 0.01;
+    mat.uniforms.uTime.value = time;
+    mat.uniforms.uMouse.value.set(mouseX, mouseY);
 
-    // Gentle floating animation
-    humanGroup.position.y = Math.sin(time) * 0.05;
-    humanGroup.rotation.y = Math.sin(time * 0.3) * 0.15;
+    blob.rotation.y = time * 0.08 + mouseX * 0.2;
+    blob.rotation.x = mouseY * 0.1;
+    wire.rotation.y = -time * 0.05;
+    wire.rotation.x = time * 0.03;
 
-    // Arm sway
-    leftArm.rotation.z = 0.3 + Math.sin(time * 1.5) * 0.1;
-    rightArm.rotation.z = -0.3 - Math.sin(time * 1.5) * 0.1;
+    rings.forEach((r, i) => {
+      r.rotation.z = time * (0.06 + i * 0.02);
+      r.rotation.x = Math.PI / 3 + i * 0.4 + Math.sin(time * 0.3 + i) * 0.1;
+    });
 
-    // Platform pulse
-    const scale = 1 + Math.sin(time * 2) * 0.05;
-    platform.scale.set(scale, 1, scale);
-    glowRing.scale.set(scale * 1.2, 1, scale * 1.2);
+    pts.rotation.y = time * 0.03;
+
+    camera.position.x += (mouseX * 0.8 - camera.position.x) * 0.03;
+    camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.03;
+    camera.lookAt(0, 0, 0);
 
     renderer.render(scene, camera);
   }
   animate();
-
-  // Handle resize
-  window.addEventListener('resize', () => {
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  });
 })();
 </script>
-
 </body>
 </html>
